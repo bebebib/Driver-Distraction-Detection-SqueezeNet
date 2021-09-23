@@ -3,7 +3,6 @@ import tensorflow as tf
 import numpy as np
 import os
 from shutil import rmtree
-from playsound import playsound
 from tensorflow.python.client import device_lib
 
 #Use GPU for deep learning
@@ -60,9 +59,9 @@ print(val_image_gen.class_indices)
 #Define a fire_module to add layers to SqueezenET
 def fire_module(x,filter1,filter2,filter3,name):
     
-    F_squeeze = tf.keras.layers.Conv2D(filters=filter1, kernel_size=(1,1),                                        kernel_regularizer='l2',                                       padding = 'same', activation='relu', name = 'SqueezeFire' + name)(x)
-    F_expand_1x1 = tf.keras.layers.Conv2D(filters=filter2, kernel_size=(1,1),                                           kernel_regularizer='l2',                                          padding = 'same', activation='relu', name = 'Expand1x1Fire' + name)(F_squeeze)
-    F_expand_3x3 = tf.keras.layers.Conv2D(filters=filter2, kernel_size=(3,3),                                          kernel_regularizer='l2',                                          padding = 'same', activation='relu', name = 'Expand3x3Fire' + name)(F_squeeze)
+    F_squeeze = tf.keras.layers.Conv2D(filters=filter1, kernel_size=(1,1), kernel_regularizer='l2',padding = 'same', activation='relu', name = 'SqueezeFire' + name)(x)
+    F_expand_1x1 = tf.keras.layers.Conv2D(filters=filter2, kernel_size=(1,1), kernel_regularizer='l2', padding = 'same', activation='relu', name = 'Expand1x1Fire' + name)(F_squeeze)
+    F_expand_3x3 = tf.keras.layers.Conv2D(filters=filter2, kernel_size=(3,3), kernel_regularizer='l2', padding = 'same', activation='relu', name = 'Expand3x3Fire' + name)(F_squeeze)
 
     x = tf.keras.layers.Concatenate(axis = -1,name = 'Concatenate' + name)([F_expand_1x1, F_expand_3x3])
 
@@ -79,7 +78,7 @@ x = 0
 img_input = tf.keras.Input(shape=(224,224,3), name = 'Input')
 
 #Conv2D
-x = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), strides = (2,2),                            kernel_regularizer='l2',                           padding = 'same', activation='relu', name = 'Conv2D_1')(img_input)
+x = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), strides = (2,2), kernel_regularizer='l2', padding = 'same', activation='relu', name = 'Conv2D_1')(img_input)
 
 #Max Pool
 x = tf.keras.layers.MaxPool2D(pool_size=(3, 3), strides = (2,2), padding = 'valid', name = 'MaxPool1')(x)
@@ -118,7 +117,7 @@ x = fire_module(x,64,256,256,'9')
 x = tf.keras.layers.Dropout(0.5, name = 'Dropout9')(x)
 
 #Conv2D
-x = tf.keras.layers.Conv2D(filters=1000, kernel_size=(1,1), strides = (1,1),                           padding = 'same', activation='relu', name = 'Conv2D_10')(x)
+x = tf.keras.layers.Conv2D(filters=1000, kernel_size=(1,1), strides = (1,1), padding = 'same', activation='relu', name = 'Conv2D_10')(x)
 
 #Max Pool
 x = tf.keras.layers.AveragePooling2D(pool_size=(13, 13), strides = (1,1), name = 'MaxPool10')(x)
