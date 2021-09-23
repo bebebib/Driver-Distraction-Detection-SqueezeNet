@@ -26,12 +26,11 @@ image_gen_train = tf.keras.preprocessing.image.ImageDataGenerator(
         height_shift_range=0.1, # Shift the pic height by a max of 10%
         shear_range=0.2, # Shear means cutting away part of the image (max 20%)
         zoom_range=0.2, # Zoom in by 20% max
-        fill_mode='nearest',# Fill in missing pixels with the nearest filled value
+        fill_mode='nearest',#Fill in missing pixels with the nearest filled value
         ) 
 
 #No preprocessing on validation images
 image_gen_val = tf.keras.preprocessing.image.ImageDataGenerator() 
-
 
 #Here we define batch size, as well as the reshaping of our image
 batch_size_train = 64
@@ -44,9 +43,6 @@ train_image_gen = image_gen_train.flow_from_directory(train_directory,
                                                batch_size=batch_size_train,
                                                class_mode='categorical')
 
-#We find we have 2 classes
-print(train_image_gen.class_indices)
-
 #Here we load our validation set, 
 #which will be used to make sure we are not overfitting the data
 val_image_gen = image_gen_val.flow_from_directory(val_directory,
@@ -54,14 +50,12 @@ val_image_gen = image_gen_val.flow_from_directory(val_directory,
                                                batch_size=batch_size_val,
                                                class_mode='categorical')
 
-print(val_image_gen.class_indices)
-
-#Define a fire_module to add layers to SqueezenET
+#Define a fire_module to add layers to SqueezeNet
 def fire_module(x,filter1,filter2,filter3,name):
     
     F_squeeze = tf.keras.layers.Conv2D(filters=filter1, kernel_size=(1,1), kernel_regularizer='l2',padding = 'same', activation='relu', name = 'SqueezeFire' + name)(x)
     F_expand_1x1 = tf.keras.layers.Conv2D(filters=filter2, kernel_size=(1,1), kernel_regularizer='l2', padding = 'same', activation='relu', name = 'Expand1x1Fire' + name)(F_squeeze)
-    F_expand_3x3 = tf.keras.layers.Conv2D(filters=filter2, kernel_size=(3,3), kernel_regularizer='l2', padding = 'same', activation='relu', name = 'Expand3x3Fire' + name)(F_squeeze)
+    F_expand_3x3 = tf.keras.layers.Conv2D(filters=filter3, kernel_size=(3,3), kernel_regularizer='l2', padding = 'same', activation='relu', name = 'Expand3x3Fire' + name)(F_squeeze)
 
     x = tf.keras.layers.Concatenate(axis = -1,name = 'Concatenate' + name)([F_expand_1x1, F_expand_3x3])
 
@@ -74,62 +68,42 @@ def fire_module(x,filter1,filter2,filter3,name):
 #Re-intialize
 SqueezeNet = 0
 x = 0
-
 img_input = tf.keras.Input(shape=(224,224,3), name = 'Input')
-
 #Conv2D
 x = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), strides = (2,2), kernel_regularizer='l2', padding = 'same', activation='relu', name = 'Conv2D_1')(img_input)
-
 #Max Pool
 x = tf.keras.layers.MaxPool2D(pool_size=(3, 3), strides = (2,2), padding = 'valid', name = 'MaxPool1')(x)
-
 #Fire 2
 x = fire_module(x,16,64,64,'2')
-
 #Fire 3
 x = fire_module(x,16,64,64,'3')
-
 #Fire 4
 x = fire_module(x,32,128,128,'4')
-
 #Max Pool
 x = tf.keras.layers.MaxPool2D(pool_size=(3, 3), strides = (2,2), name = 'MaxPool4')(x)
-
 #Fire 5
 x = fire_module(x,32,128,128,'5')
-
 #Fire 6
 x = fire_module(x,48,192,192,'6')
-
 #Fire 7
 x = fire_module(x,48,192,192,'7')
-
 #Fire 8
 x = fire_module(x,64,256,256,'8')
-
 #Max Pool
 x = tf.keras.layers.MaxPool2D(pool_size=(3, 3), strides = (2,2), name = 'MaxPool8')(x)
-
 #Fire 9
 x = fire_module(x,64,256,256,'9')
-
 #Dropout 
 x = tf.keras.layers.Dropout(0.5, name = 'Dropout9')(x)
-
 #Conv2D
 x = tf.keras.layers.Conv2D(filters=1000, kernel_size=(1,1), strides = (1,1), padding = 'same', activation='relu', name = 'Conv2D_10')(x)
-
 #Max Pool
 x = tf.keras.layers.AveragePooling2D(pool_size=(13, 13), strides = (1,1), name = 'MaxPool10')(x)
-
 SqueezeNet = tf.keras.Model(img_input, x, name = 'SqueezeNet')
-
 SqueezeNet.summary()
-
 
 #Load weights for SqueezeNet trained on ImageNet
 SqueezeNet.load_weights("squeezenet_v1.1_weights.h5")
-
 
 #Here the last layer of SqueezeNet is replaced with a Dense Layer of two neurons, since this is a binary classification
 SqueezeNet_Preloaded = 0

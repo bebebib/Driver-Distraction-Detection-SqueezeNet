@@ -11,7 +11,3 @@ tflite_model = converter.convert()
 
 #Save model
 open("SqueezeNet_Lite_9598.tflite", "wb").write(tflite_model)
-
-
-
-
