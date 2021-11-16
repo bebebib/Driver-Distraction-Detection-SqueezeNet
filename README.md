@@ -7,7 +7,7 @@ It can take a trained model, and then convert it from a TensorFlow model to a Te
 
 SqueezeNetv1.1 is loaded with a pre-trained version which was trained on the ImageNet database to an accuracy of 80.3%. 
 
-For further explanation of this project, please refer to reference [4]
+For further explanation of this project, please refer to reference https://dx.doi.org/10.7302/3710
 
 ## References
 [1] Abouelnaga, Y., Eraqi, H. M., & Moustafa, M. N. (2017). Real-time Distracted Driver
@@ -18,5 +18,3 @@ SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model si
 1–13. http://arxiv.org/abs/1602.07360.
 
 [3] Forresti (2018) SqueezeNet [SqueezeNet_v1.1] https://github.com/forresti/SqueezeNet
-
-[4] My published paper goes here
